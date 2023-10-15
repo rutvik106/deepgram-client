@@ -81,8 +81,13 @@ export default {
             this.socket.addEventListener("message", (event) => {
                 const message = event.data;
                 console.log("Received message:", message);
-                this.text = this.text + ' ' + message
+                this.text = this.text + ' \n \n' + message
                 // Handle the incoming message as needed
+            });
+
+
+            this.socket.addEventListener("transcript-completed", () => {
+               alert('SILENCE WAS DETECTED')
             });
 
             this.socket.addEventListener("transcript", (event) => {
