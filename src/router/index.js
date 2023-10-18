@@ -18,6 +18,11 @@ const router = createRouter({
       name: 'p2',
       component: () => import('../views/TextToAudioWsV2.vue')
     },
+    {
+      path: '/AudioToAudio',
+      name: 'p3',
+      component: () => import('../views/AudioToAudio.vue')
+    },
   ]
 })
 

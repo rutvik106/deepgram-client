@@ -21,9 +21,23 @@ export default {
     data() {
         return {
             socket: null,
+
             connected: false,
             microphone: null,
             text: '',
+            callingTextToAudioApi: false,
+
+            audioContext: new (window.AudioContext || window.webkitAudioContext)(),
+
+            isPlaying: false,
+
+            mediaSource: new MediaSource(),
+            audio: new Audio(),
+            sourceBuffer: null,
+
+            chunks: [],  // Array to store incoming chunks
+            audioStack: []  // Array to store incoming chunks
+
         };
     },
 
@@ -79,7 +93,7 @@ export default {
 
             let vm = this
 
-            vm.socket = new WebSocket('wss://deepgram-test-qw7lwc6szq-uw.a.run.app/listen');
+            vm.socket = new WebSocket('wss://mebot-api.fusionbit.in/audio-to-audio-ws?bot_id=3ffd8b2d-2f2d-4a9f-9547-afebc50e384a');
 
             vm.socket.addEventListener("open", async () => {
                 vm.connected = true;
@@ -89,9 +103,7 @@ export default {
 
             vm.socket.addEventListener("message", (event) => {
                 const message = event.data;
-                console.log("Received message: ", message);
-
-                vm.text = vm.text + ' \n \n' + message
+                console.log(event.data);
 
             });
 
