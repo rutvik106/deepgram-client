@@ -1,12 +1,9 @@
 <template>
     <div>
-        <h1>DEEPGRAM</h1>
-        <h5>START SPEAKING</h5>
-        <p>{{ text }}</p>
-
+        <p>{{ status }}</p>
     </div>
 
-    <button @click="">Play</button>
+    <button @click="start">Start</button>
 
 </template>
 
@@ -20,6 +17,7 @@ export default {
             audioContext: new (window.AudioContext || window.webkitAudioContext)(),
             audioQueue: [],
             isPlaying: false,
+            status: 'This is not using Buffer',
         };
     },
 
@@ -83,17 +81,14 @@ export default {
             } catch (error) {
                 console.error('Error decoding audio data', error);
             }
+        },
+
+        start(){
+            this.processTestResponse('Hi')
         }
 
 
     },
-
-    mounted() {
-
-
-        this.processTestResponse('Hi')
-
-    }
 
 }
 

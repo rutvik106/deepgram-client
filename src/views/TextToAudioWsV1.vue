@@ -1,12 +1,9 @@
 <template>
     <div>
-        <h1>DEEPGRAM</h1>
-        <h5>START SPEAKING</h5>
-        <p>{{ text }}</p>
-
+        <p>{{ status }}</p>
     </div>
 
-    <button @click="">Play</button>
+    <button @click="start">Start</button>
 
 </template>
 
@@ -21,8 +18,10 @@ export default {
             audioQueue: [],
             audioBuffer: new Uint8Array(),
             isPlaying: false,
+
             minBufferLength: 1024 * 1, // Example size, may need adjustment
 
+            status: 'This is using Buffer',
         };
     },
 
@@ -106,15 +105,14 @@ export default {
             source.connect(this.audioContext.destination);
             source.onended = this.playNextChunk;
             source.start();
+        },
+
+        start(){
+            this.processTestResponse('Hi')
         }
+
+
     },
-
-    mounted() {
-
-
-        this.processTestResponse('who is elon musk?')
-
-    }
 
 }
 
