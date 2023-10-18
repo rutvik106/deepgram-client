@@ -1,12 +1,15 @@
 <template>
     <div>
+
         <h1>DEEPGRAM</h1>
         <h5>START SPEAKING</h5>
+
+        <button @click="ready">Ready!</button>
+
         <p>{{ text }}</p>
 
     </div>
 
-    <button @click="">Play</button>
 
 </template>
 
@@ -113,14 +116,12 @@ export default {
 
         },
 
+        ready(){
+            this.init()
+        }
+
 
     },
-
-    mounted() {
-
-        this.init()
-
-    }
 
 }
 
