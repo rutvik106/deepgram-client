@@ -131,7 +131,7 @@ export default {
             const vm = this
 
             let botId = '3ffd8b2d-2f2d-4a9f-9547-afebc50e384a';
-            let userId = 'fusionbit.in@gmail.com'
+            let userEmail = 'fusionbit.in@gmail.com'
 
             vm.socket2 = new WebSocket('wss://mebot-api.fusionbit.in/ws');
             vm.socket2.binaryType = 'arraybuffer';
@@ -140,21 +140,11 @@ export default {
 
                 console.log("TEXT to AUDIO WebSocket endpoint is open now.");
 
-                let jsonData = '{"query":"hi how are you?","botId":"3ffd8b2d-2f2d-4a9f-9547-afebc50e384a","userId":"fusionbit.in@gmail.com"}'
-
                 vm.socket2.send(JSON.stringify({
                     query: "hi how are you?",
                     botId: botId,
-                    userId: userId
+                    userEmail: userEmail
                 }));
-
-                // vm.socket2.send({
-                //     query: "hi how are you?",
-                //     botId: "3ffd8b2d-2f2d-4a9f-9547-afebc50e384a",
-                //     userId: "fusionbit.in@gmail.com"
-                // });
-
-                //vm.socket2.send(JSON.parse(jsonData));
 
             });
 

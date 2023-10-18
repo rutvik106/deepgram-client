@@ -30,7 +30,7 @@ export default {
             const vm = this
 
             let botId = '3ffd8b2d-2f2d-4a9f-9547-afebc50e384a';
-            let userId = 'fusionbit.in@gmail.com'
+            let userEmail = 'fusionbit.in@gmail.com'
 
             vm.socket2 = new WebSocket('wss://mebot-api.fusionbit.in/text-to-audio-ws')
             vm.socket2.binaryType = 'arraybuffer'
@@ -39,7 +39,7 @@ export default {
                 vm.socket2.send(JSON.stringify({
                     query: text,
                     botId: botId,
-                    userId: userId
+                    userEmail: userEmail
                 }));
             });
 
@@ -91,7 +91,7 @@ export default {
     mounted() {
 
 
-        this.processTestResponse('say hello to me')
+        this.processTestResponse('Hi')
 
     }
 
