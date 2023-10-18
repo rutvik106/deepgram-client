@@ -6,7 +6,7 @@ const router = createRouter({
     {
       path: '/',
       name: 'home',
-      component: () => import('../views/DeepgramTest.vue')
+      component: () => import('../views/TextToAudioWsV2.vue')
     },
   ]
 })

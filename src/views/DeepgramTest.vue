@@ -5,6 +5,9 @@
         <p>{{ text }}</p>
 
     </div>
+
+    <button @click="">Play</button>
+
 </template>
 
 
@@ -15,9 +18,23 @@ export default {
     data() {
         return {
             socket: null,
+            socket2: null,
             connected: false,
             microphone: null,
             text: '',
+            callingTextToAudioApi: false,
+
+            audioContext: new (window.AudioContext || window.webkitAudioContext)(),
+
+            isPlaying: false,
+
+            mediaSource: new MediaSource(),
+            audio: new Audio(),
+            sourceBuffer: null,
+
+            chunks: [],  // Array to store incoming chunks
+            audioStack: []  // Array to store incoming chunks
+
         };
     },
 
@@ -68,41 +85,34 @@ export default {
             }
         },
 
+
         init() {
 
-            this.socket = new WebSocket('wss://deepgram-test-qw7lwc6szq-uw.a.run.app/listen');
+            let vm = this
 
-            this.socket.addEventListener("open", async () => {
-                this.connected = true;
+            vm.socket = new WebSocket('wss://deepgram-test-qw7lwc6szq-uw.a.run.app/listen');
+
+            vm.socket.addEventListener("open", async () => {
+                vm.connected = true;
                 console.log("WebSocket is open.");
-                await this.start();
+                await vm.start();
             });
 
-            this.socket.addEventListener("message", (event) => {
+            vm.socket.addEventListener("message", (event) => {
                 const message = event.data;
-                console.log("Received message:", message);
-                this.text = this.text + ' \n \n' + message
-                // Handle the incoming message as needed
+                console.log("Received message: ", message);
+
+                vm.text = vm.text + ' \n \n' + message
+
             });
 
-
-            this.socket.addEventListener("transcript-completed", () => {
-               alert('SILENCE WAS DETECTED')
-            });
-
-            this.socket.addEventListener("transcript", (event) => {
-                const message = event.data;
-                //console.log("transcript:", message);
-
-                // Handle the incoming message as needed
-            });
-
-            this.socket.addEventListener("close", () => {
-                this.connected = false;
+            vm.socket.addEventListener("close", () => {
+                vm.connected = false;
                 console.log("WebSocket is closed.");
             });
 
-        }
+        },
+
 
     },
 
