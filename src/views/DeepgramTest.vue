@@ -31,9 +31,14 @@ export default {
 
         async getMicrophone() {
 
+            this.text = this.text + " getting microphone... | "
+
             const userMedia = await navigator.mediaDevices.getUserMedia({
                 audio: true,
             });
+
+            this.text = this.text + " microphone ready... | "
+
 
             return new MediaRecorder(userMedia);
 
@@ -41,20 +46,33 @@ export default {
 
         async openMicrophone() {
 
-            await this.microphone.start(500);
+            this.text = this.text + " opening microphone... | "
+
+
+            await this.microphone.start(2000);
 
             this.microphone.onstart = () => {
+
+                this.text = this.text + " client: microphone opened | "
+
+
                 console.log("client: microphone opened");
-                document.body.classList.add("recording");
             };
 
             this.microphone.onstop = () => {
                 console.log("client: microphone closed");
-                document.body.classList.remove("recording");
+
+                this.text = this.text + " client: microphone closed | "
+
+
             };
 
             this.microphone.ondataavailable = (e) => {
                 console.log("client: sent data to websocket");
+
+                this.text = this.text + " client: sent data to websocket | "
+
+
                 this.socket.send(e.data);
             };
         },
@@ -66,6 +84,7 @@ export default {
         async start() {
             if (!this.microphone) {
                 // open and close the microphone
+                this.text = this.text + " initializing microphone... | "
                 this.microphone = await this.getMicrophone();
                 await this.openMicrophone();
             } else {
@@ -81,9 +100,14 @@ export default {
 
             vm.socket = new WebSocket('wss://deepgram-test-qw7lwc6szq-uw.a.run.app/listen');
 
+            vm.text = vm.text + " connecting to socket... | "
+
             vm.socket.addEventListener("open", async () => {
                 vm.connected = true;
                 console.log("WebSocket is open.");
+
+                vm.text = vm.text + " connecting is connected... | "
+
                 await vm.start();
             });
 
@@ -102,7 +126,7 @@ export default {
 
         },
 
-        ready(){
+        ready() {
             this.init()
         }
 
