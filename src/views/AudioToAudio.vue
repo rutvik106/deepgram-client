@@ -1,12 +1,12 @@
 <template>
     <div>
 
-        <h1>DEEPGRAM</h1>
-        <h5>START SPEAKING</h5>
+        <h1>AUDIO TO AUDIO (Using Websocket)</h1>
+        <h5>Click on Ready and then START SPEAKING</h5>
 
-        <button @click="ready">Ready!</button>
+        <button @click="ready">Click me!</button>
 
-        <p>{{ text }}</p>
+        <p>{{ status }}</p>
 
     </div>
 
@@ -24,19 +24,15 @@ export default {
 
             connected: false,
             microphone: null,
-            text: '',
+
             callingTextToAudioApi: false,
 
             audioContext: new (window.AudioContext || window.webkitAudioContext)(),
-
+            audioQueue: [],
             isPlaying: false,
 
-            mediaSource: new MediaSource(),
-            audio: new Audio(),
-            sourceBuffer: null,
+            status: 'AUDIO TO AUDIO TEST',
 
-            chunks: [],  // Array to store incoming chunks
-            audioStack: []  // Array to store incoming chunks
 
         };
     },
@@ -94,6 +90,7 @@ export default {
             let vm = this
 
             vm.socket = new WebSocket('wss://mebot-api.fusionbit.in/audio-to-audio-ws?bot_id=3ffd8b2d-2f2d-4a9f-9547-afebc50e384a');
+            vm.socket.binaryType = 'arraybuffer'
 
             vm.socket.addEventListener("open", async () => {
                 vm.connected = true;
@@ -105,6 +102,12 @@ export default {
                 const message = event.data;
                 console.log(event.data);
 
+                const audioData = new Uint8Array(event.data);
+                this.audioQueue.push(audioData);
+                if (!this.isPlaying) {
+                    this.playNextChunk();
+                }
+
             });
 
             vm.socket.addEventListener("close", () => {
@@ -112,6 +115,27 @@ export default {
                 console.log("WebSocket is closed.");
             });
 
+        },
+
+        async playNextChunk() {
+            if (this.audioQueue.length === 0) {
+                this.isPlaying = false;
+                return;
+            }
+
+            this.isPlaying = true;
+            const audioData = this.audioQueue.shift();
+
+            try {
+                const audioBuffer = await this.audioContext.decodeAudioData(audioData.buffer);
+                const source = this.audioContext.createBufferSource();
+                source.buffer = audioBuffer;
+                source.connect(this.audioContext.destination);
+                source.onended = this.playNextChunk;
+                source.start();
+            } catch (error) {
+                console.error('Error decoding audio data', error);
+            }
         },
 
         ready(){
