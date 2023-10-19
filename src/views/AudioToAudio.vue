@@ -51,7 +51,7 @@ export default {
 
         async openMicrophone() {
 
-            await this.microphone.start();
+            await this.microphone.start(2000);
 
             this.microphone.onstart = () => {
                 console.log("client: microphone opened");

@@ -72,6 +72,9 @@ export default {
 
                 this.text = this.text + " client: sent data to websocket | "
 
+                this.text = this.text + e.data
+
+                console.log(e.data)
 
                 this.socket.send(e.data);
             };
