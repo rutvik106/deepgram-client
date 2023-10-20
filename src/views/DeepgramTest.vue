@@ -106,7 +106,11 @@ export default {
 
             let vm = this
 
-            vm.socket = new WebSocket('wss://deepgram-test-qw7lwc6szq-uw.a.run.app/listen');
+            //vm.socket = new WebSocket('wss://deepgram-test-qw7lwc6szq-uw.a.run.app/listen');
+
+            vm.socket = new WebSocket('wss://deepgram-ws-7moobktv3q-uc.a.run.app/listen')
+
+
 
             vm.text = vm.text + " connecting to socket... | "
 

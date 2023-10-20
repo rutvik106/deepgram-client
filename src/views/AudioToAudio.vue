@@ -4,7 +4,7 @@
         <h1>AUDIO TO AUDIO (Using Websocket)</h1>
         <h5>Click on Ready and then START SPEAKING</h5>
 
-        <button @click="ready">Click me!</button>
+        <button @click="ready">Start Mic</button>
 
         <p>{{ status }}</p>
 
@@ -31,7 +31,7 @@ export default {
             audioQueue: [],
             isPlaying: false,
 
-            status: 'AUDIO TO AUDIO TEST',
+            status: 'All process will print here...',
 
 
         };
@@ -51,10 +51,18 @@ export default {
 
         async openMicrophone() {
 
+            const vm=this
+
             await this.microphone.start(3000);
 
             this.microphone.onstart = () => {
                 console.log("client: microphone opened");
+
+                vm.status = vm.status + " | Mic connected..."
+
+                vm.status = vm.status + " | Start speaking now..."
+
+
                 document.body.classList.add("recording");
             };
 
@@ -64,9 +72,10 @@ export default {
             };
 
             this.microphone.ondataavailable = (e) => {
-                console.log("client: sent data to websocket");
-                this.closeMicrophone()
-                this.socket.send(e.data);
+                if(!this.isPlaying){
+                    console.log("client: sent data to websocket");
+                    this.socket.send(e.data);
+                }
             };
         },
 
@@ -75,6 +84,12 @@ export default {
         },
 
         async start() {
+
+            const vm=this
+
+            vm.status = vm.status + " | Connecting to mic..."
+
+
             if (!this.microphone) {
                 // open and close the microphone
                 this.microphone = await this.getMicrophone();
@@ -90,17 +105,23 @@ export default {
 
             let vm = this
 
-            vm.socket = new WebSocket('wss://mebot-api.fusionbit.in/audio-to-audio-ws?bot_id=3ffd8b2d-2f2d-4a9f-9547-afebc50e384a');
+            vm.status = vm.status + " | Connecting to socket..."
+
+            vm.socket = new WebSocket('wss://mebot-api.fusionbit.in/audio-to-audio-ws?voice_id=5Cam4Buz2X5KDPU9Kiif');
             vm.socket.binaryType = 'arraybuffer'
 
             vm.socket.addEventListener("open", async () => {
                 vm.connected = true;
                 console.log("WebSocket is open.");
+
+                vm.status = vm.status + " | Socket connected..."
+
+
                 await vm.start();
             });
 
             vm.socket.addEventListener("message", (event) => {
-                const message = event.data;
+
                 console.log(event.data);
 
                 const audioData = new Uint8Array(event.data);
@@ -121,7 +142,6 @@ export default {
         async playNextChunk() {
             if (this.audioQueue.length === 0) {
                 this.isPlaying = false;
-                await this.start()
                 return;
             }
 
@@ -136,11 +156,12 @@ export default {
                 source.onended = this.playNextChunk;
                 source.start();
             } catch (error) {
+                await this.playNextChunk()
                 console.error('Error decoding audio data', error);
             }
         },
 
-        ready(){
+        ready() {
             this.init()
         }
 
