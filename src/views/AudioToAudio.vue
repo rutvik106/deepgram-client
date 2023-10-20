@@ -51,7 +51,7 @@ export default {
 
         async openMicrophone() {
 
-            await this.microphone.start(2000);
+            await this.microphone.start(3000);
 
             this.microphone.onstart = () => {
                 console.log("client: microphone opened");
@@ -65,6 +65,7 @@ export default {
 
             this.microphone.ondataavailable = (e) => {
                 console.log("client: sent data to websocket");
+                this.closeMicrophone()
                 this.socket.send(e.data);
             };
         },
@@ -120,6 +121,7 @@ export default {
         async playNextChunk() {
             if (this.audioQueue.length === 0) {
                 this.isPlaying = false;
+                await this.start()
                 return;
             }
 

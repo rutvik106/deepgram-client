@@ -49,7 +49,7 @@ export default {
             this.text = this.text + " opening microphone... | "
 
 
-            await this.microphone.start(2000);
+            await this.microphone.start(3000);
 
             this.microphone.onstart = () => {
 
@@ -68,15 +68,20 @@ export default {
             };
 
             this.microphone.ondataavailable = (e) => {
-                console.log("client: sent data to websocket");
-
-                this.text = this.text + " client: sent data to websocket | "
-
-                this.text = this.text + e.data
+                console.log("microphone ondataavailable");
 
                 console.log(e.data)
 
-                this.socket.send(e.data);
+                if (e.data.size > 0) {
+                    this.text = this.text + " client: sent data to websocket | "
+
+                    this.text = this.text + e.data + " | "
+
+
+                    this.socket.send(e.data);
+                }
+
+
             };
         },
 
