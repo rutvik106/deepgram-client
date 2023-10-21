@@ -9,19 +9,24 @@ const router = createRouter({
       component: () => import('../views/DeepgramTest.vue')
     },
     {
-      path: '/TextToAudioWsV1',
+      path: '/text-to-audio-v1',
       name: 'p1',
       component: () => import('../views/TextToAudioWsV1.vue')
     },
     {
-      path: '/TextToAudioWsV2',
+      path: '/text-to-audio-v2',
       name: 'p2',
       component: () => import('../views/TextToAudioWsV2.vue')
     },
     {
-      path: '/AudioToAudio',
+      path: '/audio-to-audio',
       name: 'p3',
       component: () => import('../views/AudioToAudio.vue')
+    },
+    {
+      path: '/audio-to-audio-pcm',
+      name: 'p4',
+      component: () => import('../views/AudioToAudioV3.vue')
     },
   ]
 })
