@@ -158,7 +158,7 @@ export default {
             const arrayBuffer = this.audioQueue.shift();
 
             try {
-                const { leftChannelData, rightChannelData } = await this.getPCMData(arrayBuffer);
+                const {leftChannelData, rightChannelData} = await this.getPCMData(arrayBuffer);
                 await this.playPCMData(leftChannelData, rightChannelData);
             } catch (error) {
                 console.error("Error decoding audio:", error);
@@ -167,7 +167,8 @@ export default {
 
 
         async getPCMData(arrayBuffer) {
-            const vm=this
+            const vm = this
+            console.error(arrayBuffer)
             const audioBuffer = await vm.audioContext.decodeAudioData(arrayBuffer);
             const leftChannelData = audioBuffer.getChannelData(0);
 
@@ -183,7 +184,7 @@ export default {
         },
 
         async playPCMData(leftChannelData, rightChannelData, sampleRate = 44100) {
-            const vm=this
+            const vm = this
 
             const numberOfChannels = rightChannelData ? 2 : 1;
 
@@ -211,8 +212,6 @@ export default {
                 this.playNextChunk(); // Try playing the next chunk, if any.
             };
         },
-
-
 
 
         ready() {

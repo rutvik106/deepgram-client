@@ -9,6 +9,7 @@
   },
   "dependencies": {
     "socket.io-client": "^4.7.2",
+    "standardized-audio-context": "^25.3.58",
     "vue": "^3.3.4",
     "vue-router": "^4.2.4",
     "websocket": "^1.0.34"

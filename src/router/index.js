@@ -14,7 +14,7 @@ const router = createRouter({
       component: () => import('../views/TextToAudioWsV1.vue')
     },
     {
-      path: '/text-to-audio-v2',
+      path: '/speech-to-audio-v2',
       name: 'p2',
       component: () => import('../views/TextToAudioWsV2.vue')
     },
@@ -27,6 +27,16 @@ const router = createRouter({
       path: '/audio-to-audio-pcm',
       name: 'p4',
       component: () => import('../views/AudioToAudioV3.vue')
+    },
+    {
+      path: '/audio-to-audio-v4',
+      name: 'p5',
+      component: () => import('../views/AudioToAudioV4.vue')
+    },
+    {
+      path: '/audio-to-audio-custom-context',
+      name: 'p5',
+      component: () => import('../views/AudioToAudioV5.vue')
     },
   ]
 })

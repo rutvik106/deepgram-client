@@ -1,7 +1,7 @@
 <template>
     <div>
 
-        <h1>AUDIO TO AUDIO (Using Websocket)</h1>
+        <h1>AUDIO TO AUDIO (Using Custom Audio Context)</h1>
         <h5>Click on Ready and then START SPEAKING</h5>
 
         <button @click="ready">Start Mic</button>
@@ -16,6 +16,8 @@
 
 <script>
 
+import {decodeAudioData, isSupported} from 'standardized-audio-context';
+
 export default {
 
     data() {
@@ -27,11 +29,17 @@ export default {
 
             callingTextToAudioApi: false,
 
-            audioContext: new (window.AudioContext || window.webkitAudioContext)(),
+            // audioContext: new (window.AudioContext ||
+            //     window.webkitAudioContext ||
+            //     window.mozAudioContext ||
+            //     window.oAudioContext ||
+            //     window.msAudioContext)(),
+
+
             audioQueue: [],
             isPlaying: false,
 
-            status: 'this is using chunks logic from old project',
+            status: 'All process will print here...',
 
 
         };
@@ -53,7 +61,7 @@ export default {
 
             const vm = this
 
-            await this.microphone.start(500);
+            await this.microphone.start(3000);
 
             this.microphone.onstart = () => {
                 console.log("client: microphone opened");
@@ -105,13 +113,17 @@ export default {
 
             let vm = this
 
+            const audioContext = window.CustomAudioContext;
+
             vm.status = vm.status + " | Connecting to socket..."
 
             vm.socket = new WebSocket('wss://mebot-api.fusionbit.in/audio-to-audio-ws?voice_id=5Cam4Buz2X5KDPU9Kiif');
             vm.socket.binaryType = 'arraybuffer'
 
             vm.socket.addEventListener("open", async () => {
+
                 vm.connected = true;
+
                 console.log("WebSocket is open.");
 
                 vm.status = vm.status + " | Socket connected..."
@@ -121,14 +133,21 @@ export default {
 
             vm.socket.addEventListener("message", (event) => {
 
+                console.log("-----DATA FROM WS-----")
                 console.log(event.data);
+                console.log("----- XXX -----")
 
                 const audioData = new Uint8Array(event.data);
 
-                this.audioQueue.push(audioData);
+                console.log("-----Uint8Array-----")
+                console.log(audioData);
+                console.log("----- XXX -----")
+
+                this.audioQueue.push(event.data);
+
 
                 if (!this.isPlaying) {
-                    this.processAudio();
+                    this.playNextChunk(audioContext);
                 }
 
             });
@@ -140,91 +159,46 @@ export default {
 
         },
 
-        async processAudio() {
-
-            const vm = this
-
-            let multiplier = 1
-
-            const chunkSize = 1024 * multiplier; // Adjust this based on your needs
-
-            console.log("Chunk size set to: " + chunkSize)
-
-            let audioBuffer = new Uint8Array();
-
-            console.log("Reading new chunk of buffer")
-
+        async playNextChunk(audioContext) {
             if (this.audioQueue.length === 0) {
                 this.isPlaying = false;
+                return;
             }
 
-            const value = this.audioQueue.shift();
+            this.isPlaying = true;
+            const audioData = this.audioQueue.shift();
 
-            audioBuffer = vm.concatenateUint8Arrays(audioBuffer, value);
+            try {
 
-            console.log(audioBuffer.length + " > " + chunkSize)
+                console.log("-----audioData-----")
+                console.log(audioData);
+                console.log("----- XXX -----")
 
-            if (audioBuffer.length >= chunkSize) {
-                console.log("Now Playing a chunk of audio")
+                // console.log("-----audioData BUFFER-----")
+                // console.log(audioData.buffer);
+                // console.log("----- XXX -----")
 
-                await vm.playAudioChunk(audioBuffer);
+                const audioBuffer = await decodeAudioData(audioContext, audioData)
+                console.log(audioData)
+                const source = audioContext.createBufferSource();
+                source.buffer = audioBuffer;
+                source.connect(audioContext.destination);
+                source.onended = this.playNextChunk;
+                source.start();
+            } catch (error) {
+                console.error("-----audioData-----")
+                console.error(audioData);
+                console.error("----- XXX -----")
 
-                audioBuffer = new Uint8Array();
-                console.log("Played a chunk")
+                // console.error("-----audioData BUFFER-----")
+                // console.error(audioData.buffer);
+                // console.error("----- XXX -----")
+
+                this.isPlaying = false
+
+                this.socket.close()
+                console.error('Error decoding audio data', error);
             }
-
-            // Play any remaining audio buffer
-            if (audioBuffer.length > 0) {
-                console.log("check A playing remaining buffer")
-
-                await vm.playAudioChunk(audioBuffer)
-
-            }
-
-
-        },
-
-
-        async playAudioChunk(buffer) {
-
-            const vm = this
-
-            console.log("Inside playAudioChunk method")
-
-            return new Promise((resolve) => {
-
-                console.log("decodeAudioData")
-                vm.audioContext.decodeAudioData(buffer.buffer, (audioBuffer) => {
-
-                    console.log("DECODING SUCCESSFUL")
-                    const source = vm.audioContext.createBufferSource();
-                    source.buffer = audioBuffer;
-                    source.connect(vm.audioContext.destination);
-
-                    source.onended = () => {
-                        console.log("Playing ended freeing resources")
-                        source.disconnect()
-                        source.buffer = null
-                        resolve();
-                    };
-
-                    console.log("Now Playing...")
-
-                    source.start();
-
-                }, (error) => {
-                    console.error('Error decoding audio:', error);
-                    resolve();
-                });
-            });
-        },
-
-        concatenateUint8Arrays(arr1, arr2) {
-            console.log("concatenateUint8Arrays")
-            const result = new Uint8Array(arr1.length + arr2.length);
-            result.set(arr1, 0);
-            result.set(arr2, arr1.length);
-            return result;
         },
 
         ready() {
@@ -233,6 +207,24 @@ export default {
 
 
     },
+
+    mounted() {
+
+        isSupported()
+            .then((isBrowserSupported) => {
+
+                if (isBrowserSupported) {
+                    console.log("BROWSER IS SUPPORTED")
+                } else {
+                    alert("NOT SUPPORTED")
+
+                }
+            })
+            .catch(() => {
+                alert("ERROR")
+            });
+
+    }
 
 }
 
