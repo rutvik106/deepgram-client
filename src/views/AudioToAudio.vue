@@ -154,8 +154,11 @@ export default {
                 //const audioBuffer = await this.audioContext.decodeAudioData(audioData.buffer);
                 //const audioBuffer = await decodeAudio(audioData.buffer);
 
+                console.log("decoders.mp3()")
                 await decoders.mp3(); // load & compile decoder
+                console.log("decoders.mp3(audioData)")
                 const audioBuffer = await decoders.mp3(audioData); // decode
+                console.log("DECODING COMPLETE")
 
                 const source = this.audioContext.createBufferSource();
                 source.buffer = audioBuffer;
