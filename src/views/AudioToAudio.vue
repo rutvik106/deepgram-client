@@ -16,6 +16,8 @@
 
 <script>
 
+import decode, {decoders} from 'audio-decode';
+
 export default {
 
     data() {
@@ -51,7 +53,7 @@ export default {
 
         async openMicrophone() {
 
-            const vm=this
+            const vm = this
 
             await this.microphone.start(3000);
 
@@ -72,7 +74,7 @@ export default {
             };
 
             this.microphone.ondataavailable = (e) => {
-                if(!this.isPlaying){
+                if (!this.isPlaying) {
                     console.log("client: sent data to websocket");
                     this.socket.send(e.data);
                 }
@@ -85,7 +87,7 @@ export default {
 
         async start() {
 
-            const vm=this
+            const vm = this
 
             vm.status = vm.status + " | Connecting to mic..."
 
@@ -149,7 +151,12 @@ export default {
             const audioData = this.audioQueue.shift();
 
             try {
-                const audioBuffer = await this.audioContext.decodeAudioData(audioData.buffer);
+                //const audioBuffer = await this.audioContext.decodeAudioData(audioData.buffer);
+                //const audioBuffer = await decodeAudio(audioData.buffer);
+
+                await decoders.mp3(); // load & compile decoder
+                const audioBuffer = await decoders.mp3(audioData); // decode
+
                 const source = this.audioContext.createBufferSource();
                 source.buffer = audioBuffer;
                 source.connect(this.audioContext.destination);

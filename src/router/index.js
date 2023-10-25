@@ -35,8 +35,12 @@ const router = createRouter({
     },
     {
       path: '/audio-to-audio-custom-context',
-      name: 'p5',
+      name: 'p6',
       component: () => import('../views/AudioToAudioV5.vue')
+    },
+    {
+      path: '/audio-to-audio-howler',
+      component: () => import('../views/AudioToAudioHowler.vue')
     },
   ]
 })
