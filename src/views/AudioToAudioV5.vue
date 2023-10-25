@@ -29,12 +29,6 @@ export default {
 
             callingTextToAudioApi: false,
 
-            // audioContext: new (window.AudioContext ||
-            //     window.webkitAudioContext ||
-            //     window.mozAudioContext ||
-            //     window.oAudioContext ||
-            //     window.msAudioContext)(),
-
 
             audioQueue: [],
             isPlaying: false,
@@ -118,7 +112,7 @@ export default {
             vm.status = vm.status + " | Connecting to socket..."
 
             vm.socket = new WebSocket('wss://mebot-api.fusionbit.in/audio-to-audio-ws?voice_id=5Cam4Buz2X5KDPU9Kiif');
-            vm.socket.binaryType = 'arraybuffer'
+            //vm.socket.binaryType = 'arraybuffer'
 
             vm.socket.addEventListener("open", async () => {
 
@@ -131,24 +125,23 @@ export default {
                 await vm.start();
             });
 
-            vm.socket.addEventListener("message", (event) => {
+            vm.socket.addEventListener("message", async (event) => {
 
                 console.log("-----DATA FROM WS-----")
                 console.log(event.data);
                 console.log("----- XXX -----")
 
-                const audioData = new Uint8Array(event.data);
+                const audioBufferChunk = await audioContext.decodeAudioData(this.withWaveHeader(event.data, 2, 44100))
+                let source = audioContext.createBufferSource();
+                source.buffer = audioBufferChunk;
+                source.connect(audioContext.destination);
+                source.start(source.buffer.duration);
 
-                console.log("-----Uint8Array-----")
-                console.log(audioData);
-                console.log("----- XXX -----")
-
-                this.audioQueue.push(event.data);
-
-
-                if (!this.isPlaying) {
-                    this.playNextChunk(audioContext);
-                }
+                // this.audioQueue.push(event.data);
+                //
+                // if (!this.isPlaying) {
+                //     this.playNextChunk(audioContext);
+                // }
 
             });
 
@@ -174,25 +167,19 @@ export default {
                 console.log(audioData);
                 console.log("----- XXX -----")
 
-                // console.log("-----audioData BUFFER-----")
-                // console.log(audioData.buffer);
-                // console.log("----- XXX -----")
-
                 const audioBuffer = await decodeAudioData(audioContext, audioData)
                 console.log(audioData)
                 const source = audioContext.createBufferSource();
-                source.buffer = audioBuffer;
+
+                source.buffer = audioContext.createBuffer(1, audioBuffer.length, 44100)
+                //source.buffer = audioBuffer;
                 source.connect(audioContext.destination);
-                source.onended = this.playNextChunk;
+                source.onended = await this.playNextChunk;
                 source.start();
             } catch (error) {
                 console.error("-----audioData-----")
                 console.error(audioData);
                 console.error("----- XXX -----")
-
-                // console.error("-----audioData BUFFER-----")
-                // console.error(audioData.buffer);
-                // console.error("----- XXX -----")
 
                 this.isPlaying = false
 
@@ -203,6 +190,53 @@ export default {
 
         ready() {
             this.init()
+        },
+
+        withWaveHeader(data, numberOfChannels, sampleRate) {
+            const header = new ArrayBuffer(44);
+
+            const d = new DataView(header);
+
+            d.setUint8(0, "R".charCodeAt(0));
+            d.setUint8(1, "I".charCodeAt(0));
+            d.setUint8(2, "F".charCodeAt(0));
+            d.setUint8(3, "F".charCodeAt(0));
+
+            d.setUint32(4, data.byteLength / 2 + 44, true);
+
+            d.setUint8(8, "W".charCodeAt(0));
+            d.setUint8(9, "A".charCodeAt(0));
+            d.setUint8(10, "V".charCodeAt(0));
+            d.setUint8(11, "E".charCodeAt(0));
+            d.setUint8(12, "f".charCodeAt(0));
+            d.setUint8(13, "m".charCodeAt(0));
+            d.setUint8(14, "t".charCodeAt(0));
+            d.setUint8(15, " ".charCodeAt(0));
+
+            d.setUint32(16, 16, true);
+            d.setUint16(20, 1, true);
+            d.setUint16(22, numberOfChannels, true);
+            d.setUint32(24, sampleRate, true);
+            d.setUint32(28, sampleRate * 1 * 2);
+            d.setUint16(32, numberOfChannels * 2);
+            d.setUint16(34, 16, true);
+
+            d.setUint8(36, "d".charCodeAt(0));
+            d.setUint8(37, "a".charCodeAt(0));
+            d.setUint8(38, "t".charCodeAt(0));
+            d.setUint8(39, "a".charCodeAt(0));
+            d.setUint32(40, data.byteLength, true);
+
+            return this.concat(header, data);
+        },
+
+        concat(buffer1, buffer2) {
+            const tmp = new Uint8Array(buffer1.byteLength + buffer2.byteLength);
+
+            tmp.set(new Uint8Array(buffer1), 0);
+            tmp.set(new Uint8Array(buffer2), buffer1.byteLength);
+
+            return tmp.buffer;
         }
 
 
