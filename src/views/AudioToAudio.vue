@@ -55,7 +55,7 @@ export default {
 
             const vm = this
 
-            await this.microphone.start(3000);
+            await this.microphone.start(500);
 
             this.microphone.onstart = () => {
                 console.log("client: microphone opened");
