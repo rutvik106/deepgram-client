@@ -1,7 +1,7 @@
 <template>
     <div>
 
-        <h1>AUDIO TO AUDIO (Using Websocket and MP3 Decoder) v4</h1>
+        <h1>AUDIO TO AUDIO (Using Websocket and MP3 Decoder) v5</h1>
         <h5>Click on Ready and then START SPEAKING</h5>
 
         <button @click="ready">Start Mic</button>
@@ -55,7 +55,7 @@ export default {
 
             const vm = this
 
-            //navigator.audioSession.type = 'play-and-record';
+            navigator.audioSession.type = 'play-and-record';
 
             await this.microphone.start(500);
 
