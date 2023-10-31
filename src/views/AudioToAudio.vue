@@ -1,7 +1,7 @@
 <template>
     <div>
 
-        <h1>AUDIO TO AUDIO (Using Websocket and MP3 Decoder)</h1>
+        <h1>AUDIO TO AUDIO (Using Websocket and MP3 Decoder) v2</h1>
         <h5>Click on Ready and then START SPEAKING</h5>
 
         <button @click="ready">Start Mic</button>
