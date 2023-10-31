@@ -47,6 +47,8 @@ export default {
                 audio: true,
             });
 
+            navigator.audioSession.type = 'play-and-record';
+
             return new MediaRecorder(userMedia);
 
         },
