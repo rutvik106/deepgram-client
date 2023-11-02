@@ -1,7 +1,7 @@
 <template>
     <div>
 
-        <h1>AUDIO TO AUDIO (Using Websocket and MP3 Decoder) v5</h1>
+        <h1>AUDIO TO AUDIO (Using Websocket and MP3 Decoder) v6</h1>
         <h5>Click on Ready and then START SPEAKING</h5>
 
         <button @click="ready">Start Mic</button>
@@ -44,7 +44,10 @@ export default {
         async getMicrophone() {
 
             const userMedia = await navigator.mediaDevices.getUserMedia({
-                audio: true,
+                audio: {
+                    deviceId: localStorage.micId,
+                    channelCount: 2
+                }
             });
 
             return new MediaRecorder(userMedia);
@@ -181,6 +184,47 @@ export default {
 
 
     },
+
+    async mounted() {
+
+        const vm=this
+
+        try {
+            const stream = await navigator.mediaDevices.getUserMedia({
+                audio: {
+                    deviceId: localStorage.micId,
+                    channelCount: 2
+                }
+            });
+
+            // Granted. Store deviceIds for next time
+            localStorage.micId = stream.getAudioTracks()[0].getSettings().deviceId;
+
+            if (!navigator.mediaDevices?.enumerateDevices) {
+                console.log("enumerateDevices() not supported.");
+            } else {
+                // List cameras and microphones.
+                navigator.mediaDevices
+                    .enumerateDevices()
+                    .then((devices) => {
+                        devices.forEach((device) => {
+                            console.log(`${device.kind}: ${device.label} id = ${device.deviceId}`);
+                        });
+                    })
+                    .catch((err) => {
+                        console.error(`${err.name}: ${err.message}`);
+                    });
+            }
+
+        } catch (error) {
+            if (error.name != "OverconstrainedError") {
+                throw error;
+            }
+            // Overconstrained. No suitable replacements found
+        }
+
+
+    }
 
 }
 
